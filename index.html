@@ -314,7 +314,6 @@
               <span class="label">Gross Pay</span>
               <span class="value">${fmtAmt(p.gross)}</span>
             </div>
-            ${p.allowance ? `<div class="payslip-row"><span class="label" style="color:#27ae60;">Allowance</span><span class="value" style="color:#27ae60;">${fmtAmt(p.allowance)}</span></div>` : ''}
             <hr class="payslip-divider">
           </div>
           ${dedsHTML}
@@ -592,7 +591,7 @@
               <span class="label">Gross Pay</span>
               <span class="value">${fmtAmt(p.gross)}</span>
             </div>
-            ${p.allowance ? `<div class="payslip-row"><span class="label" style="color:#27ae60;">Allowance</span><span class="value" style="color:#27ae60;">${fmtAmt(p.allowance)}</span></div>` : ''}
+            ${p.allowance ? `<div class="payslip-row"><span class="label" style="color:#27ae60;">+ Allowance</span><span class="value" style="color:#27ae60;">${fmtAmt(p.allowance)}</span></div>` : ''}
             <hr class="payslip-divider">
           </div>
           ${dedsHTML}
