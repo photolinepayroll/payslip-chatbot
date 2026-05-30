@@ -311,7 +311,7 @@
           </div>
           <div class="payslip-body">
             <div class="payslip-row">
-              <span class="label">Gross Pay</span>
+              <span class="label">Basic Salary</span>
               <span class="value">${fmtAmt(p.gross)}</span>
             </div>
             <hr class="payslip-divider">
@@ -587,11 +587,25 @@
             <div class="emp-date">📅 ${p.date || '—'}</div>
           </div>
           <div class="payslip-body">
+            ${p.allowance ? `
+            <div class="payslip-row">
+              <span class="label">Basic Salary</span>
+              <span class="value">${fmtAmt((parseFloat(String(p.gross).replace(/,/g,'')) - parseFloat(String(p.allowance).replace(/,/g,''))).toFixed(2))}</span>
+            </div>
+            <div class="payslip-row">
+              <span class="label" style="color:#27ae60;">+ Allowance</span>
+              <span class="value" style="color:#27ae60;">${fmtAmt(p.allowance)}</span>
+            </div>
+            <div class="payslip-row" style="border-top:1px solid #eee;padding-top:6px;margin-top:2px;">
+              <span class="label" style="font-weight:600;">Gross Pay</span>
+              <span class="value" style="font-weight:600;">${fmtAmt(p.gross)}</span>
+            </div>
+            ` : `
             <div class="payslip-row">
               <span class="label">Gross Pay</span>
               <span class="value">${fmtAmt(p.gross)}</span>
             </div>
-            ${p.allowance ? `<div class="payslip-row"><span class="label" style="color:#27ae60;">+ Allowance</span><span class="value" style="color:#27ae60;">${fmtAmt(p.allowance)}</span></div>` : ''}
+            `}
             <hr class="payslip-divider">
           </div>
           ${dedsHTML}
