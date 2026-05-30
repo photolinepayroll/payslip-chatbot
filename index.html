@@ -553,8 +553,8 @@
       const fmtVal = (v) => {
         const n = parseFloat(String(v).replace(/,/g,''));
         if (isNaN(n)) return v;
-        // If whole number show as is, else format as peso
-        return Number.isInteger(n) ? n.toString() : fmtAmt(v);
+        // Always show as plain number — no peso sign
+        return Number.isInteger(n) ? n.toString() : n.toLocaleString('en-PH', {minimumFractionDigits:2, maximumFractionDigits:2});
       };
 
       let dedsHTML = '';
