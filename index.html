@@ -513,13 +513,15 @@
       const deductions = [];
       if (lessMatch) {
         const lessText = lessMatch[1];
-        const dedPattern = /([A-Za-z][^=]*?)\s*=\s*([\d,.()-]+)\s*[.,]/g;
+        // Handle both LABEL=AMOUNT and LABEL=REF=AMOUNT formats
+        const dedPattern = /([A-Za-z][^=,]*?)=[^=,]*?=([\d,.()\-]+)(?:[,\s]|$)|([A-Za-z][^=,]*?)\s*=\s*([\d,.()\-]+)\s*[.,]/g;
         let m;
         while ((m = dedPattern.exec(lessText)) !== null) {
-          const label = m[1].trim();
-          const amt = m[2].trim();
+          const label = (m[1] || m[3] || '').trim();
+          const amt = (m[2] || m[4] || '').trim().replace(/,\s*$/, '');
           const isPureNumber = /^\d+$/.test(label);
-          if (label && amt && label.length < 80 && !isPureNumber) {
+          const isMinute = /^(\d+)?M\s*(\(|$)/i.test(label);
+          if (label && amt && label.length < 80 && !isPureNumber && !isMinute) {
             deductions.push({ label: label, amount: amt });
           }
         }
