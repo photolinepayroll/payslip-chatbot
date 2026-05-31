@@ -311,7 +311,7 @@
           </div>
           <div class="payslip-body">
             <div class="payslip-row">
-              <span class="label">Basic Salary</span>
+              <span class="label">Earnings</span>
               <span class="value">${fmtAmt(p.gross)}</span>
             </div>
             <hr class="payslip-divider">
@@ -575,7 +575,7 @@
       let earningsHTML = '';
       if (p.earnings.length > 0) {
         earningsHTML = '<div class="payslip-deductions" style="border-top:1px dashed #e0e0e0;padding-top:8px;">';
-        earningsHTML += '<div class="ded-title" style="color:#1877F2;">Earnings</div>';
+        earningsHTML += '<div class="ded-title" style="color:#1877F2;">Pay Details</div>';
         p.earnings.forEach(function(e) {
           earningsHTML += '<div class="ded-item"><span>' + e.label + '</span><span style="color:#1877F2;font-weight:500;">' + fmtVal(e.value) + '</span></div>';
         });
@@ -591,7 +591,7 @@
           <div class="payslip-body">
             ${p.allowance ? `
             <div class="payslip-row">
-              <span class="label">Basic Salary</span>
+              <span class="label">Earnings</span>
               <span class="value">${fmtAmt((parseFloat(String(p.gross).replace(/,/g,'')) - parseFloat(String(p.allowance).replace(/,/g,''))).toFixed(2))}</span>
             </div>
             <div class="payslip-row">
