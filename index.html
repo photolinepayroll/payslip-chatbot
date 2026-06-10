@@ -340,8 +340,8 @@
         </div>`;
     }
 
-    function fetchData(acct) {
-      return fetch(SHEET_URL + '?acct=' + encodeURIComponent(acct))
+    function fetchData(acct, lastname) {
+      return fetch(SHEET_URL + '?acct=' + encodeURIComponent(acct) + '&lastname=' + encodeURIComponent(lastname))
         .then(r => r.json());
     }
 
@@ -626,7 +626,9 @@
         </div>`;
     }
 
-        function sendMsg() {
+    let _pendingAcct = null;
+
+    function sendMsg() {
       const inp = document.getElementById('userinput');
       const val = inp.value.trim();
       if (!val) return;
@@ -638,13 +640,29 @@
       box.appendChild(userDiv);
       inp.value = '';
 
-      const loadingDiv = addBotMsg('<span class="spinner"></span> Looking up your payslip...');
+      // Step 1: collect account number
+      if (!_pendingAcct) {
+        _pendingAcct = val;
+        addBotMsg('🔒 Para ma-verify ang iyong identity, ilagay ang iyong <strong>apelyido (last name)</strong>:');
+        return;
+      }
 
-      fetchData(val.trim())
+      // Step 2: collect last name and verify
+      const lastname = val;
+      const acct = _pendingAcct;
+      _pendingAcct = null;
+
+      const loadingDiv = addBotMsg('<span class="spinner"></span> Verifying...');
+
+      fetchData(acct, lastname)
         .then(function(data) {
           loadingDiv.remove();
+          if (data.status === 'wrongname') {
+            addBotMsg('❌ Hindi tumugma ang apelyido. Pakisuri at subukan ulit.');
+            return;
+          }
           if (data.status !== 'ok' || !data.rows || data.rows.length === 0) {
-            addBotMsg('❌ No records found for account <strong>' + val + '</strong>.<br>Please check if the number is correct, or contact HR/Payroll.');
+            addBotMsg('❌ No records found for account <strong>' + acct + '</strong>.<br>Please check if the number is correct, or contact HR/Payroll.');
             return;
           }
           showDateChoices(data.rows);
