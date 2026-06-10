@@ -134,10 +134,10 @@
           const ws = wb.Sheets[wb.SheetNames[0]];
           const rows = XLSX.utils.sheet_to_json(ws, { defval: '', header: 1 });
           const records = [];
-          rows.forEach(function(row, i) {
-            if (i === 0) return;
+          rows.forEach(function(row) {
             const acct = String(row[0] || '').trim().replace(/^'/, '');
             const response = String(row[1] || '').trim();
+            if (!acct || !/\d/.test(acct)) return; // skip header/empty rows
             if (acct && response) records.push({ 'Account No': acct, 'Response': response });
           });
           if (records.length === 0) { addBotMsg('⚠️ No data found in the file.'); return; }
