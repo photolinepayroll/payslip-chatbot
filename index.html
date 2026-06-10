@@ -659,6 +659,7 @@
           loadingDiv.remove();
           if (data.status === 'wrongname') {
             addBotMsg('❌ Last name does not match. Please check and try again.');
+            addBotMsg('🔄 Please enter your <strong>last 8-digit account number</strong> to try again.');
             return;
           }
           if (data.status !== 'ok' || !data.rows || data.rows.length === 0) {
