@@ -141,19 +141,58 @@
             if (acct && response) records.push({ 'Account No': acct, 'Response': response });
           });
           if (records.length === 0) { addBotMsg('⚠️ No data found in the file.'); return; }
-          addBotMsg('<span class="spinner"></span> Saving to Google Sheets... please wait!');
+
+          // Progress bar bubble
+          const progressDiv = addBotMsg(
+            '<div style="font-size:13px;color:#555;margin-bottom:8px;">📤 Saving to Google Sheets...</div>' +
+            '<div style="background:#e0e0e0;border-radius:20px;overflow:hidden;height:14px;width:100%;">' +
+              '<div id="upload-progress-bar" style="height:14px;width:0%;background:#1877F2;border-radius:20px;transition:width 0.3s ease;"></div>' +
+            '</div>' +
+            '<div id="upload-progress-label" style="font-size:12px;color:#888;margin-top:6px;text-align:right;">0%</div>'
+          );
+
+          // Simulate progress up to 85%
+          let pct = 0;
+          const interval = setInterval(function() {
+            if (pct < 85) {
+              pct += Math.random() * 12;
+              if (pct > 85) pct = 85;
+              const bar = document.getElementById('upload-progress-bar');
+              const lbl = document.getElementById('upload-progress-label');
+              if (bar) bar.style.width = pct.toFixed(0) + '%';
+              if (lbl) lbl.textContent = pct.toFixed(0) + '%';
+            }
+          }, 300);
+
           fetch(SHEET_URL, { method: 'POST', body: JSON.stringify({ rows: records }) })
             .then(r => r.json())
             .then(function(data) {
+              clearInterval(interval);
+              const bar = document.getElementById('upload-progress-bar');
+              const lbl = document.getElementById('upload-progress-label');
               if (data.status === 'ok') {
-                document.getElementById('upload-label').textContent = file.name;
-                document.getElementById('upload-badge').style.display = 'inline';
-                document.getElementById('record-count').textContent = records.length + ' record(s) saved!';
-                addBotMsg('✅ Na-save na ang <strong>' + records.length + ' records</strong> mula sa "' + file.name + '"! 🎉');
+                if (bar) bar.style.width = '100%';
+                if (lbl) lbl.textContent = '100%';
+                setTimeout(function() {
+                  progressDiv.innerHTML =
+                    '<div style="font-size:13px;font-weight:600;color:#276749;">✅ Completed! ' + records.length + ' records saved from "' + file.name + '".</div>' +
+                    '<div style="background:#e0e0e0;border-radius:20px;overflow:hidden;height:14px;width:100%;margin-top:6px;">' +
+                      '<div style="height:14px;width:100%;background:#27ae60;border-radius:20px;"></div>' +
+                    '</div>' +
+                    '<div style="font-size:12px;color:#27ae60;margin-top:6px;text-align:right;font-weight:600;">100% — Done!</div>';
+                  document.getElementById('upload-label').textContent = file.name;
+                  document.getElementById('upload-badge').style.display = 'inline';
+                  document.getElementById('record-count').textContent = records.length + ' record(s) saved!';
+                }, 400);
               } else {
+                if (bar) bar.style.background = '#e74c3c';
+                if (lbl) lbl.textContent = 'Error';
                 addBotMsg('⚠️ Error: ' + (data.message || 'unknown'));
               }
-            }).catch(() => addBotMsg('⚠️ Cannot connect to Google Sheets.'));
+            }).catch(function() {
+              clearInterval(interval);
+              addBotMsg('⚠️ Cannot connect to Google Sheets.');
+            });
         } catch(err) { addBotMsg('⚠️ Error reading the file.'); }
       };
       reader.readAsArrayBuffer(file);
