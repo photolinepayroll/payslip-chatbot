@@ -658,7 +658,7 @@
         .then(function(data) {
           loadingDiv.remove();
           if (data.status === 'wrongname') {
-            addBotMsg('❌ Hindi tumugma ang apelyido. Pakisuri at subukan ulit.');
+            addBotMsg('❌ Last name does not match. Please check and try again.');
             return;
           }
           if (data.status !== 'ok' || !data.rows || data.rows.length === 0) {
