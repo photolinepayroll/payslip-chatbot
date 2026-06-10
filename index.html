@@ -98,7 +98,6 @@
   <div class="footer">© 2026 PHOTOLINE &nbsp;|&nbsp; Developed by GJA (HR)</div>
 
   <script>
-    const ADMIN_PASSWORD = 'Photoline.201';
     const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwoZifp2RQip9Fmb6hfzJc2eAnbURfKsL9xF3g4H0cqsHS4dTLCmiCyFJWaBFaQgOaI/exec';
 
     function toggleAdmin() {
@@ -107,14 +106,22 @@
 
     function checkPassword() {
       const val = document.getElementById('adminPass').value;
-      if (val === ADMIN_PASSWORD) {
-        document.getElementById('uploadArea').classList.add('unlocked');
-        document.getElementById('passErr').style.display = 'none';
-        document.getElementById('adminPass').value = '';
-        addBotMsg('✅ Admin access granted! You can now upload your Excel file.');
-      } else {
-        document.getElementById('passErr').style.display = 'block';
-      }
+      if (!val) return;
+      fetch(SHEET_URL + '?action=checkPassword&password=' + encodeURIComponent(val))
+        .then(r => r.json())
+        .then(function(data) {
+          if (data.status === 'ok') {
+            document.getElementById('uploadArea').classList.add('unlocked');
+            document.getElementById('passErr').style.display = 'none';
+            document.getElementById('adminPass').value = '';
+            addBotMsg('✅ Admin access granted! You can now upload your Excel file.');
+          } else {
+            document.getElementById('passErr').style.display = 'block';
+          }
+        })
+        .catch(function() {
+          addBotMsg('⚠️ Cannot verify password. Check your connection.');
+        });
     }
 
     document.getElementById('xlfile').addEventListener('change', function(e) {
@@ -333,16 +340,9 @@
         </div>`;
     }
 
-    let cachedData = null;
-
-    function fetchData() {
-      if (cachedData) return Promise.resolve(cachedData);
-      return fetch(SHEET_URL)
-        .then(r => r.json())
-        .then(function(data) {
-          cachedData = data;
-          return data;
-        });
+    function fetchData(acct) {
+      return fetch(SHEET_URL + '?acct=' + encodeURIComponent(acct))
+        .then(r => r.json());
     }
 
     function extractDate(response) {
@@ -640,29 +640,14 @@
 
       const loadingDiv = addBotMsg('<span class="spinner"></span> Looking up your payslip...');
 
-      fetchData()
+      fetchData(val.trim())
         .then(function(data) {
           loadingDiv.remove();
           if (data.status !== 'ok' || !data.rows || data.rows.length === 0) {
-            addBotMsg('⚠️ No payroll data available yet. Please wait for the next update from HR/Payroll.');
-            return;
-          }
-          const search = val.trim().replace(/^'/,'').replace(/^0+/,'');
-          const matches = data.rows.filter(function(r) {
-            const acct = String(r['Account No'] || '').replace(/^'/,'').trim();
-            const acctStripped = acct.replace(/^0+/,'');
-            // Match exact, last N digits, or strip leading zeros
-            return acct === val.trim() ||
-                   acct === search ||
-                   acctStripped === search ||
-                   acct.slice(-val.trim().length) === val.trim() ||
-                   acct.slice(-search.length) === search;
-          });
-          if (matches.length === 0) {
             addBotMsg('❌ No records found for account <strong>' + val + '</strong>.<br>Please check if the number is correct, or contact HR/Payroll.');
             return;
           }
-          showDateChoices(matches);
+          showDateChoices(data.rows);
         })
         .catch(function() {
           loadingDiv.remove();
