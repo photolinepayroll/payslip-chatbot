@@ -426,8 +426,8 @@
 
       // Sort by date descending — latest first
       matches.sort(function(a, b) {
-        const da = extractDate(a['Response'] || '');
-        const db = extractDate(b['Response'] || '');
+        const da = toInputDate(extractDate(a['Response'] || ''));
+        const db = toInputDate(extractDate(b['Response'] || ''));
         return db.localeCompare(da);
       });
 
