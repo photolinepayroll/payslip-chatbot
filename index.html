@@ -276,7 +276,18 @@
         if (penaltyMatch) latePenalty = penaltyMatch[1];
       }
 
-      return { date, name, salary, gross, totalLess, totalPay, deductions, allowance, lateEntries, latePenalty };
+      // Extract earnings breakdown: Earnings: 9,870. +1,678.(Fr.+Ml.)= GROSS:...
+      let earningsBase = '';
+      let earningsExtra = '';
+      let earningsExtraLabel = '';
+      const earningsMatch = raw.match(/Earnings:\s*([\d,]+)\.?\s*\+\s*([\d,]+)\.?\(([^)]+)\)\s*=/i);
+      if (earningsMatch) {
+        earningsBase = earningsMatch[1];
+        earningsExtra = earningsMatch[2];
+        earningsExtraLabel = earningsMatch[3];
+      }
+
+      return { date, name, salary, gross, totalLess, totalPay, deductions, allowance, lateEntries, latePenalty, earningsBase, earningsExtra, earningsExtraLabel };
     }
 
     function buildPayslipCard(raw) {
@@ -356,8 +367,17 @@
             <div class="emp-date">📅 ${p.date || '—'}</div>
           </div>
           <div class="payslip-body">
+            ${p.earningsBase ? `
             <div class="payslip-row">
-              <span class="label">Earnings</span>
+              <span class="label">Basic Pay</span>
+              <span class="value">${fmtAmt(p.earningsBase)}</span>
+            </div>
+            <div class="payslip-row">
+              <span class="label" style="color:#27ae60;">+ ${p.earningsExtraLabel}</span>
+              <span class="value" style="color:#27ae60;">${fmtAmt(p.earningsExtra)}</span>
+            </div>` : ''}
+            <div class="payslip-row">
+              <span class="label">Gross Earnings</span>
               <span class="value">${fmtAmt(p.gross)}</span>
             </div>
             <hr class="payslip-divider">
