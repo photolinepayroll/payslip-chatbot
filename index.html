@@ -291,8 +291,9 @@
     }
 
     function buildPayslipCard(raw) {
-      // Detect format: if has EARNINGS section use new format
-      if (/EARNINGS:/i.test(raw)) {
+      // Detect format: ALL-CAPS "EARNINGS:" section (label=value list) uses the old new-format card.
+      // Mixed-case "Earnings: 9,870. +1,678.(Fr.+Ml.)=" breakdown is handled by parsePayslip below.
+      if (/EARNINGS:/.test(raw)) {
         return buildPayslipCardNew(raw);
       }
       const p = parsePayslip(raw);
