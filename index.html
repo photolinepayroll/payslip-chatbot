@@ -118,6 +118,31 @@
   <div class="footer">© 2026 PHOTOLINE &nbsp;|&nbsp; Developed by GJA (HR)</div>
 
   <script>
+    function iabGateDismiss() {
+      localStorage.setItem('plPayslipGateSeen', '1');
+      document.getElementById('iabGate').style.display = 'none';
+      document.querySelector('.container').style.display = '';
+      document.querySelector('.footer').style.display = '';
+    }
+    function iabGateOpenBrowser() {
+      if (/Android/i.test(navigator.userAgent)) {
+        window.location.href = 'intent://' + location.host + location.pathname + '#Intent;scheme=https;package=com.android.chrome;end';
+      }
+      iabGateDismiss();
+    }
+    (function () {
+      if (localStorage.getItem('plPayslipGateSeen')) return;
+      var ua = navigator.userAgent.toLowerCase();
+      var iabSignatures = ['fban', 'fbav', 'fb_iab', 'instagram', 'viber', 'line/'];
+      var isInApp = iabSignatures.some(function (sig) { return ua.indexOf(sig) !== -1; });
+      if (!isInApp) return;
+      document.querySelector('.container').style.display = 'none';
+      document.querySelector('.footer').style.display = 'none';
+      document.getElementById('iabGate').style.display = 'flex';
+    })();
+  </script>
+
+  <script>
     const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwoZifp2RQip9Fmb6hfzJc2eAnbURfKsL9xF3g4H0cqsHS4dTLCmiCyFJWaBFaQgOaI/exec';
 
     function toggleAdmin() {
