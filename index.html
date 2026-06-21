@@ -74,11 +74,11 @@
 <body>
   <div id="iabGate">
     <img src="icons/icon-192.png" alt="Photoline Payslip">
-    <h2>Buksan muna sa iyong browser</h2>
-    <p>Para magamit ang "Add to Home Screen", buksan muna ito sa Chrome o Safari — hindi sa loob ng Messenger/Facebook/Viber.</p>
-    <button class="gate-primary" onclick="iabGateOpenBrowser()">Buksan sa Browser</button>
-    <div class="gate-hint">Kung hindi gumana: i-tap ang &#8943; o share icon sa itaas ng screen, piliin ang "Open in Browser".</div>
-    <button class="gate-secondary" onclick="iabGateDismiss()">Magpatuloy dito</button>
+    <h2>Open mo muna sa browser mo</h2>
+    <p>Para gumana ang "Add to Home Screen", i-open mo ito sa Chrome or Safari — hindi dito sa Messenger/Facebook/Viber.</p>
+    <button class="gate-primary" onclick="iabGateOpenBrowser()">Open sa Browser</button>
+    <div class="gate-hint">Kung hindi gumana: tap mo ang &#8943; o share icon sa taas, then piliin ang "Open in Browser".</div>
+    <button class="gate-secondary" onclick="iabGateDismiss()">Continue dito</button>
   </div>
   <div class="container">
     <div style="text-align:center; margin-bottom:12px;">
@@ -119,7 +119,6 @@
 
   <script>
     function iabGateDismiss() {
-      localStorage.setItem('plPayslipGateSeen', '1');
       document.getElementById('iabGate').style.display = 'none';
       document.querySelector('.container').style.display = '';
       document.querySelector('.footer').style.display = '';
@@ -131,7 +130,6 @@
       iabGateDismiss();
     }
     (function () {
-      if (localStorage.getItem('plPayslipGateSeen')) return;
       var ua = navigator.userAgent.toLowerCase();
       var iabSignatures = ['fban', 'fbav', 'fb_iab', 'instagram', 'viber', 'line/'];
       var isInApp = iabSignatures.some(function (sig) { return ua.indexOf(sig) !== -1; });
