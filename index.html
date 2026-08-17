@@ -273,7 +273,7 @@
           const amt = m[2].trim();
           // Skip date-based entries, minute/late values, and pure number labels
           const isDateEntry = /^\d+\/\d+/.test(label.trim());
-          const isMinuteEntry = /^(\d+)?M\s*(\(|$)/i.test(label.trim());
+          const isMinuteEntry = /^\d*M\s*\(?\s*(free|late)?\s*\)?\s*$/i.test(label.trim());
           const isPureNumber = /^\d+$/.test(label.trim());
           if (label && amt && label.length < 60 && !isDateEntry && !isMinuteEntry && !isPureNumber) {
             deductions.push({ label: label, amount: amt });
