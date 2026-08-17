@@ -308,15 +308,20 @@
       if (lateBlockMatch) {
         const lateText = lateBlockMatch[1];
         // Match date entries like: 4/12=2M (FREE), 4/15=4M, 4/22=25M-15M=10M (LATE)
-        const latePattern = /(\d+\/\d+=[^,]+(?:FREE|LATE|M)[^,]*)/g;
+        const latePattern = /(\d+\/\d+=[^,]+(?:FREE|LATE|M)[^,]*)/gi;
         let lm;
         while ((lm = latePattern.exec(lateText)) !== null) {
           const entry = lm[1].trim();
           if (entry) lateEntries.push(entry);
         }
-        // Get total penalty — last number before the comma after all date entries
-        const penaltyMatch = lateText.match(/(?:FREE|LATE|M[^,]*)=\s*([\d.]+)\./);
-        if (penaltyMatch) latePenalty = penaltyMatch[1];
+        // Total penalty trails the last date entry itself, e.g. "...08/04=7M = 45."
+        // (searching the whole LESS block for this pattern can false-match unrelated
+        // deductions like "XAOMI-CP= 500.", since "M" also appears inside "XAOMI")
+        if (lateEntries.length > 0) {
+          const lastEntry = lateEntries[lateEntries.length - 1];
+          const penaltyMatch = lastEntry.match(/=\s*([\d.]+)\.?\s*$/);
+          if (penaltyMatch) latePenalty = penaltyMatch[1];
+        }
       }
 
       // Extract earnings breakdown: Earnings: 9,870. +1,678.(Fr.+Ml.)= GROSS:...
@@ -362,11 +367,11 @@
         lateHTML = '<div class="payslip-deductions" style="border-top:1px dashed #e0e0e0;padding-top:8px;">';
         lateHTML += '<div class="ded-title" style="color:#e67e22;">Late / Undertime</div>';
         p.lateEntries.forEach(function(entry) {
-          const isFree = entry.indexOf('FREE') !== -1;
-          const isLate = entry.indexOf('LATE') !== -1;
+          const isFree = /free/i.test(entry);
+          const isLate = /late/i.test(entry);
           const color = isFree ? '#27ae60' : '#e74c3c';
           const tag = isFree ? ' (FREE)' : isLate ? ' (LATE)' : '';
-          const clean = entry.replace(/=\s*[\d.]+\.?$/, '').replace(/(FREE|LATE)/g, '').trim();
+          const clean = entry.replace(/=\s*[\d.]+\.?$/, '').replace(/(free|late)/gi, '').trim();
           lateHTML += '<div class="ded-item"><span style="color:' + color + ';">' + clean + tag + '</span>';
           if (isFree) lateHTML += '<span style="color:#27ae60;">excused</span>';
           lateHTML += '</div>';
