@@ -338,6 +338,40 @@
       return { date, name, salary, gross, totalLess, totalPay, deductions, allowance, lateEntries, latePenalty, earningsBase, earningsExtra, earningsExtraLabel };
     }
 
+    // Tiered late/undertime penalty table (net minutes -> peso amount)
+    function penaltyForMinutes(minutes) {
+      if (minutes <= 0) return 0;
+      if (minutes <= 10) return 3 * minutes;
+      if (minutes <= 15) return 30;
+      if (minutes <= 30) return 40;
+      if (minutes <= 45) return 50;
+      if (minutes <= 60) return 60;
+      if (minutes <= 75) return 70;
+      if (minutes <= 90) return 80;
+      if (minutes <= 105) return 90;
+      return 90 + 10 * Math.ceil((minutes - 105) / 15);
+    }
+
+    // Computes a single late/undertime entry's own penalty amount.
+    // A "Free" tag grants a 15-minute grace: fully excused at or under 15
+    // minutes, otherwise the table applies to the remainder. Entries that
+    // already show a pre-subtracted remainder (e.g. "19M -15M Free= 4M")
+    // carry more than one M-figure — the last one is that remainder, so it
+    // goes straight to the table instead of getting the grace applied again.
+    // Returns null when the entry doesn't contain a recognizable minute figure.
+    function computeEntryPenalty(entry, isFree) {
+      const minuteMatches = [];
+      const re = /=\s*(\d+)\s*M/gi;
+      let mm;
+      while ((mm = re.exec(entry)) !== null) minuteMatches.push(parseInt(mm[1], 10));
+      if (minuteMatches.length === 0) return null;
+      const netMinutes = minuteMatches[minuteMatches.length - 1];
+      if (isFree && minuteMatches.length === 1) {
+        return netMinutes <= 15 ? 0 : penaltyForMinutes(netMinutes - 15);
+      }
+      return penaltyForMinutes(netMinutes);
+    }
+
     function buildPayslipCard(raw) {
       // Detect format: ALL-CAPS "EARNINGS:" section (label=value list) uses the old new-format card.
       // Mixed-case "Earnings: 9,870. +1,678.(Fr.+Ml.)=" breakdown is handled by parsePayslip below.
@@ -372,9 +406,16 @@
           const color = isFree ? '#27ae60' : '#e74c3c';
           const tag = isFree ? ' (FREE)' : isLate ? ' (LATE)' : '';
           const clean = entry.replace(/=\s*[\d.]+\.?$/, '').replace(/(free|late)/gi, '').trim();
-          lateHTML += '<div class="ded-item"><span style="color:' + color + ';">' + clean + tag + '</span>';
-          if (isFree) lateHTML += '<span style="color:#27ae60;">excused</span>';
-          lateHTML += '</div>';
+          const penalty = computeEntryPenalty(entry, isFree);
+          let amountHTML;
+          if (penalty === null) {
+            amountHTML = isFree ? '<span style="color:#27ae60;">excused</span>' : '';
+          } else if (penalty === 0) {
+            amountHTML = '<span style="color:#27ae60;">Free</span>';
+          } else {
+            amountHTML = '<span style="color:#e74c3c;">- ' + fmtAmt(penalty) + '</span>';
+          }
+          lateHTML += '<div class="ded-item"><span style="color:' + color + ';">' + clean + tag + '</span>' + amountHTML + '</div>';
         });
         lateHTML += '<div class="ded-item" style="border-top:1px solid #fde8cc;padding-top:4px;margin-top:4px;">';
         lateHTML += '<span style="font-weight:600;color:#e67e22;">Total Penalty</span>';
