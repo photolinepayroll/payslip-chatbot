@@ -323,7 +323,7 @@
       let earningsBase = '';
       let earningsExtra = '';
       let earningsExtraLabel = '';
-      const earningsMatch = raw.match(/Earnings:\s*([\d,]+)\.?\s*\+\s*([\d,]+)\.?\(([^)]+)\)\s*=/i);
+      const earningsMatch = raw.match(/Earnings:\s*([\d,]+(?:\.\d+)?)\.?\s*\+\s*([\d,]+(?:\.\d+)?)\.?\(([^)]+)\)\s*=/i);
       if (earningsMatch) {
         earningsBase = earningsMatch[1];
         earningsExtra = earningsMatch[2];
